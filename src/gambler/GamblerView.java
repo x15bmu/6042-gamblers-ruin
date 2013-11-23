@@ -1,6 +1,7 @@
 package gambler;
 
 import java.awt.Dimension;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
@@ -68,32 +69,34 @@ public class GamblerView extends JFrame {
 		
 		
 		JButton runOnce = new JButton ("Run Once");
-		ActionListener runOnceListener = new ActionListener() {
+		runOnce.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
 				
 			}
-		};
+		});
+		
 		JButton runToEnd = new JButton("Run To End");
-		ActionListener runToEndListener = new ActionListener() {
+		runToEnd.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
-		};
+		});
 		
 		JButton clear = new JButton("Clear");
-		ActionListener clearListener = new ActionListener() {
+		clear.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
-		};
+		});
 		
 		JPanel buttonsPanel = new JPanel();
+		buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
 		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
 		buttonsPanel.add(Box.createHorizontalGlue());
 		buttonsPanel.add(runOnce);
@@ -106,8 +109,11 @@ public class GamblerView extends JFrame {
 		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
 		buttonsPanel.add(Box.createHorizontalGlue());
 		
+		add(Box.createVerticalStrut(strutWidth));
 		add(textPanel);
+		add(Box.createVerticalStrut(strutWidth));
 		add(buttonsPanel);
+		add(Box.createVerticalStrut(strutWidth));
 		
 		pack();
 		
