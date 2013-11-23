@@ -22,8 +22,12 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.CategoryTableXYDataset;
+import org.jfree.data.xy.TableXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 import sun.awt.HorizBagLayout;
 
@@ -39,7 +43,9 @@ public class GamblerView extends JFrame {
 	JFormattedTextField targetAmount;
 	JFormattedTextField gambleAmount;
 	JFreeChart lineChart;
+	XYPlot plot = new XYPlot();
 	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+	XYDataset xydataset = new CategoryTableXYDataset();
 	
 	public GamblerView() {
 		
@@ -100,10 +106,22 @@ public class GamblerView extends JFrame {
 		runToEnd.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				lineChart.setNotify(false);
+				
+				// Add gambles to graph
 				List<Double> gambles = gambler.gambleUntilEnd(-1);
-				for (double gamble : gambles) {
-					addGamble(gamble);
+				System.out.println("end");
+				
+				// To reduce lag, add a maximum number gambles
+				int incrementAmount = (int)(Math.ceil(gambles.size()/500.0) + 0.5);
+				for (int i = 0; i < gambles.size(); i += incrementAmount) {
+					addGamble(gambles.get(i));
 				}
+				
+				lineChart.setNotify(true);
+				
+				// Reset the gambler
+				createGambler();
 			}
 		});
 		
@@ -132,6 +150,7 @@ public class GamblerView extends JFrame {
 		buttonsPanel.add(Box.createHorizontalGlue());
 		
 		lineChart = ChartFactory.createLineChart("", "", "", dataset);
+		lineChart.setAntiAlias(false);
 		ChartPanel chartPanel = new ChartPanel(lineChart);
 		
 		add(Box.createVerticalStrut(strutWidth));

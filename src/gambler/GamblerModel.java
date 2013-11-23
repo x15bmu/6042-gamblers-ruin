@@ -70,10 +70,10 @@ public class GamblerModel {
 	 */
 	public List<Double> gambleUntilEnd(int cap) {
 		if (cap < 0) {
-			cap = (int)1e6;
+			cap = (int)1e4;
 		}
 		
-		List<Double> gambles = new ArrayList<>();
+		List<Double> gambles = new ArrayList<>(cap);
 		for (int i = 0; i < cap; ++i) {
 			double gamble = gamble();
 			gambles.add(gamble);
