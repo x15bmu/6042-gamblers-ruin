@@ -4,8 +4,13 @@ import java.awt.Dimension;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Currency;
+import java.util.List;
 
+import javax.servlet.jsp.JspFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -14,17 +19,30 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 import sun.awt.HorizBagLayout;
 
 public class GamblerView extends JFrame {
 	private static final long serialVersionUID = -8874786662825257049L;
 	
+	GamblerModel gambler;
+	private int currentRow = 0;
+	private int currentColumn = 0;
+	
 	JFormattedTextField winProb;
 	JFormattedTextField initAmount;
 	JFormattedTextField targetAmount;
 	JFormattedTextField gambleAmount;
+	JFreeChart lineChart;
+	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 	
 	public GamblerView() {
+		
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		
 		JPanel textPanel = new JPanel();
@@ -40,8 +58,9 @@ public class GamblerView extends JFrame {
 		initAmount = new JFormattedTextField(NumberFormat.getCurrencyInstance());
 		targetAmount = new JFormattedTextField(NumberFormat.getCurrencyInstance());
 		gambleAmount = new JFormattedTextField(NumberFormat.getCurrencyInstance());
+		addListeners();
 		
-		winProb.setValue(0.5);
+		winProb.setValue(0.25);
 		initAmount.setValue(1000);
 		targetAmount.setValue(1100);
 		gambleAmount.setValue(1);
@@ -72,8 +91,8 @@ public class GamblerView extends JFrame {
 		runOnce.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				
+				double gamble = gambler.gamble();
+				addGamble(gamble);
 			}
 		});
 		
@@ -81,8 +100,10 @@ public class GamblerView extends JFrame {
 		runToEnd.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
+				List<Double> gambles = gambler.gambleUntilEnd(-1);
+				for (double gamble : gambles) {
+					addGamble(gamble);
+				}
 			}
 		});
 		
@@ -90,8 +111,9 @@ public class GamblerView extends JFrame {
 		clear.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
+				dataset.clear();
+				currentRow = 0;
+				createGambler();
 			}
 		});
 		
@@ -109,16 +131,75 @@ public class GamblerView extends JFrame {
 		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
 		buttonsPanel.add(Box.createHorizontalGlue());
 		
+		lineChart = ChartFactory.createLineChart("", "", "", dataset);
+		ChartPanel chartPanel = new ChartPanel(lineChart);
+		
 		add(Box.createVerticalStrut(strutWidth));
 		add(textPanel);
 		add(Box.createVerticalStrut(strutWidth));
 		add(buttonsPanel);
 		add(Box.createVerticalStrut(strutWidth));
+		add(chartPanel);
+		add(Box.createVerticalStrut(strutWidth));
 		
 		pack();
 		
+		createGambler();
+		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(true);
+	}
+	
+	public void createGambler() {
+		try {
+			DecimalFormat df = new DecimalFormat();
+			NumberFormat currency = NumberFormat.getCurrencyInstance();
+			double winProb = df.parse(this.winProb.getText()).doubleValue() / 100;
+			double initAmount = currency.parse(this.initAmount.getText()).doubleValue();
+			double targetAmount = currency.parse(this.targetAmount.getText()).doubleValue();
+			double gambleAmount = currency.parse(this.gambleAmount.getText()).doubleValue();
+			
+			gambler = new GamblerModel(winProb, initAmount, targetAmount, gambleAmount);
+			currentRow++;
+			currentColumn = 0;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void addGamble(double gamble) {
+		dataset.addValue(gamble, new Integer(currentRow), new Integer(currentColumn));
+		currentColumn++;
+	}
+	
+	private void addListeners() {
+		winProb.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createGambler();
+			}
+		});
+		
+		initAmount.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createGambler();
+			}
+		});
+		
+		targetAmount.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createGambler();
+			}
+		});
+		
+		gambleAmount.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createGambler();
+			}
+		});
 	}
 	
 	public static void main(String[] args) {
