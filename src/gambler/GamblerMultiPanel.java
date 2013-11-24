@@ -35,7 +35,7 @@ public class GamblerMultiPanel extends JFrame {
 	JFormattedTextField initAmount;
 	JFormattedTextField targetAmount;
 	JFormattedTextField gambleAmount;
-	JFreeChart boxChart;
+	JFreeChart barChart;
 	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 	
 	
@@ -84,33 +84,15 @@ public class GamblerMultiPanel extends JFrame {
 		textPanel.add(gambleAmount);
 		textPanel.add(Box.createHorizontalStrut(strutWidth));
 		
-		
-		JButton runOnce = new JButton ("Run Once");
-		runOnce.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				double gamble = gambler.gamble();
-				addGamble(gamble);
-			}
-		});
-		
-		JButton runToEnd = new JButton("Run To End");
-		runToEnd.addActionListener(new ActionListener() {
+		JButton run = new JButton("Run");
+		run.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				boxChart.setNotify(false);
+				barChart.setNotify(false);
 				
-				// Add gambles to graph
-				List<Double> gambles = gambler.gambleUntilEnd(-1);
-				System.out.println("end");
+				dataset.addValue(gambler.calcTargetProb(), new Integer(currentRow), new Integer(currentColumn));
 				
-				// To reduce lag, add a maximum number gambles
-				int incrementAmount = (int)(Math.ceil(gambles.size()/500.0) + 0.5);
-				for (int i = 0; i < gambles.size(); i += incrementAmount) {
-					addGamble(gambles.get(i));
-				}
-				
-				boxChart.setNotify(true);
+				barChart.setNotify(true);
 				
 				// Reset the gambler
 				createGambler();
@@ -131,19 +113,16 @@ public class GamblerMultiPanel extends JFrame {
 		buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
 		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
 		buttonsPanel.add(Box.createHorizontalGlue());
-		buttonsPanel.add(runOnce);
-		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
-		buttonsPanel.add(Box.createHorizontalGlue());
-		buttonsPanel.add(runToEnd);
+		buttonsPanel.add(run);
 		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
 		buttonsPanel.add(Box.createHorizontalGlue());
 		buttonsPanel.add(clear);
 		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
 		buttonsPanel.add(Box.createHorizontalGlue());
 		
-		lineChart = ChartFactory.createBarChart("", "", "", dataset);
-		lineChart.setAntiAlias(false);
-		ChartPanel chartPanel = new ChartPanel(lineChart);
+		barChart = ChartFactory.createBarChart("", "", "", dataset);
+		barChart.setAntiAlias(false);
+		ChartPanel chartPanel = new ChartPanel(barChart);
 		
 		add(Box.createVerticalStrut(strutWidth));
 		add(textPanel);

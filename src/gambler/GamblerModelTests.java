@@ -13,7 +13,7 @@ public class GamblerModelTests {
 	
 	@Test
 	public void calcTargetProb() {
-		GamblerModel g = new GamblerModel(0.49999, 1000, 1100, 10);
+		GamblerModel g = new GamblerModel(0.25, 1000, 1100, 10);
 		System.out.println(g.calcTargetProb()); 
 	}
 }

@@ -133,6 +133,7 @@ public class GamblerModel {
 	 * @return The probability of winning.
 	 */
 	public double calcTargetProb() {
+		// TODO Double check and test formula
 		double r = (1-winProb)/winProb;
 		
 		double num = (Math.pow(r, initAmount)-1);
@@ -150,25 +151,27 @@ public class GamblerModel {
 		// calculate in steps so no NaN
 		double result = 1;
 		int n = (int)(initAmount + 0.5);
-		int t = (int)(targetProb + 0.5);
+		int t = (int)(targetAmount + 0.5);
 		while (t > 1 && n > 1) {
-			num = Math.pow(r, 2);
-			n -= 2;
-			if (t % 2 == 1) {
-				num *= r;
+			if (t % 2 == 0) {
+				num = Math.pow(r, 2);
+				n -= 2;
+			} else {
+				num = r;
 				n--;
 			}
 			
-			denom = Math.pow(r, 2);
-			r -= 2;
-			if (n % 2 == 1) {
+			if (n % 2 == 0) {
+				denom = Math.pow(r, 2);
+				r -= 2;
+			} else {
 				denom *= r;
 				r--;
 			}
 			result *= num/denom;
 		}
 		
-		if (n != 1) {
+		if (n != 0) {
 			double tempNum = Math.pow(r, n);
 			if (Double.isInfinite(result * tempNum)) {
 				return 1;
@@ -177,7 +180,7 @@ public class GamblerModel {
 			}
 		}
 		
-		if (t != 1) {
+		if (t != 0) {
 			double tempDenom = Math.pow(r, t);
 			return result/tempDenom;
 		}
