@@ -19,25 +19,27 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.CategoryTableXYDataset;
+import org.jfree.data.xy.XYDataset;
 
-public class GamblerView extends JFrame {
+public class GamblerMultiPanel extends JFrame {
 	private static final long serialVersionUID = -8874786662825257049L;
 	
 	GamblerModel gambler;
-	private int currentSeries = 0;
-	private int currentX = 0;
+	private int currentRow = 0;
+	private int currentColumn = 0;
 	
 	JFormattedTextField winProb;
 	JFormattedTextField initAmount;
 	JFormattedTextField targetAmount;
 	JFormattedTextField gambleAmount;
-	JFreeChart lineChart;
-	XYSeries series;
-	XYSeriesCollection dataset = new XYSeriesCollection();
+	JFreeChart boxChart;
+	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 	
-	public GamblerView() {
+	
+	public GamblerMultiPanel() {
 		
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		
@@ -96,19 +98,19 @@ public class GamblerView extends JFrame {
 		runToEnd.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				lineChart.setNotify(false);
+				boxChart.setNotify(false);
 				
 				// Add gambles to graph
 				List<Double> gambles = gambler.gambleUntilEnd(-1);
+				System.out.println("end");
 				
 				// To reduce lag, add a maximum number gambles
 				int incrementAmount = (int)(Math.ceil(gambles.size()/500.0) + 0.5);
 				for (int i = 0; i < gambles.size(); i += incrementAmount) {
 					addGamble(gambles.get(i));
-					currentX += incrementAmount-1;
 				}
 				
-				lineChart.setNotify(true);
+				boxChart.setNotify(true);
 				
 				// Reset the gambler
 				createGambler();
@@ -119,8 +121,8 @@ public class GamblerView extends JFrame {
 		clear.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dataset.removeAllSeries();
-				currentSeries = 0;
+				dataset.clear();
+				currentRow = 0;
 				createGambler();
 			}
 		});
@@ -139,7 +141,7 @@ public class GamblerView extends JFrame {
 		buttonsPanel.add(Box.createHorizontalStrut(strutWidth));
 		buttonsPanel.add(Box.createHorizontalGlue());
 		
-		lineChart = ChartFactory.createXYLineChart("", "", "", dataset);
+		lineChart = ChartFactory.createBarChart("", "", "", dataset);
 		lineChart.setAntiAlias(false);
 		ChartPanel chartPanel = new ChartPanel(lineChart);
 		
@@ -169,19 +171,16 @@ public class GamblerView extends JFrame {
 			double gambleAmount = currency.parse(this.gambleAmount.getText()).doubleValue();
 			
 			gambler = new GamblerModel(winProb, initAmount, targetAmount, gambleAmount);
-			currentSeries++;
-			currentX = 0;
-			
-			series = new XYSeries(new Integer(currentSeries));
-			dataset.addSeries(series);
+			currentRow++;
+			currentColumn = 0;
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public void addGamble(double gamble) {
-		series.add(currentX, gamble);
-		currentX++;
+		dataset.addValue(gamble, new Integer(currentRow), new Integer(currentColumn));
+		currentColumn++;
 	}
 	
 	private void addListeners() {
@@ -215,6 +214,6 @@ public class GamblerView extends JFrame {
 	}
 	
 	public static void main(String[] args) {
-		new GamblerView();
+		new GamblerMultiPanel();
 	}
 }
