@@ -72,7 +72,7 @@ public class GamblerModel {
 	 */
 	public List<Double> gambleUntilEnd(int cap) {
 		if (cap < 0) {
-			cap = (int)1e4;
+			cap = (int)1e5;
 		}
 		
 		List<Double> gambles = new ArrayList<>(cap);
@@ -186,5 +186,10 @@ public class GamblerModel {
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		return "Pr:" + winProb + ", Init:" + initAmount + ", Target:" + targetAmount + ", Gamble:" + gambleAmount;
 	}
 }
