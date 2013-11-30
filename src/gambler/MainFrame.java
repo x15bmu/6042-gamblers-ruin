@@ -7,6 +7,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Currency;
+import java.util.Locale;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -22,6 +24,7 @@ public class MainFrame extends JFrame {
 	
 	double lastWinProbVal = 0.25;
 	JTextField winProb;
+	NumberFormat fieldFormat;
 	JFormattedTextField initAmount;
 	JFormattedTextField targetAmount;
 	JFormattedTextField gambleAmount;
@@ -31,6 +34,7 @@ public class MainFrame extends JFrame {
 	
 	JTabbedPane tabs = new JTabbedPane();
 	public MainFrame() {
+		Locale locale = Locale.getDefault();
 		setTitle("Gambler's Ruin");
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		
@@ -39,14 +43,17 @@ public class MainFrame extends JFrame {
 		textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.X_AXIS));
 		
 		JLabel winProbLabel = new JLabel("Probability of Winning: ");
-		JLabel initAmountLabel = new JLabel("Initial Amount: ");
-		JLabel targetAmountLabel = new JLabel("Target Amount: ");
-		JLabel gambleAmountLabel = new JLabel("Amount to Gamble: ");
+		JLabel initAmountLabel = new JLabel("Initial Amount: " + Currency.getInstance(locale).getSymbol());
+		JLabel targetAmountLabel = new JLabel("Target Amount: " + Currency.getInstance(locale).getSymbol());
+		JLabel gambleAmountLabel = new JLabel("Amount to Gamble: " + Currency.getInstance(locale).getSymbol());
 		
 		winProb = new JTextField();
-		initAmount = new JFormattedTextField(NumberFormat.getCurrencyInstance());
-		targetAmount = new JFormattedTextField(NumberFormat.getCurrencyInstance());
-		gambleAmount = new JFormattedTextField(NumberFormat.getCurrencyInstance());
+		fieldFormat = NumberFormat.getInstance(locale);
+		fieldFormat.setMinimumFractionDigits(2);
+		fieldFormat.setMaximumFractionDigits(2);
+		initAmount = new JFormattedTextField(fieldFormat);
+		targetAmount = new JFormattedTextField(fieldFormat);
+		gambleAmount = new JFormattedTextField(fieldFormat);
 
 		winProb.setText(Double.toString(lastWinProbVal));
 		initAmount.setValue(1000);
@@ -103,14 +110,34 @@ public class MainFrame extends JFrame {
 		winProb.addActionListener(createGamblerActionListener);
 		
 		initAmount.addFocusListener(createGamblerFocusListener);
+		initAmount.addFocusListener(formatListener);
 		initAmount.addActionListener(createGamblerActionListener);
 		
 		targetAmount.addFocusListener(createGamblerFocusListener);
+		targetAmount.addFocusListener(formatListener);
 		targetAmount.addActionListener(createGamblerActionListener);
 		
 		gambleAmount.addFocusListener(createGamblerFocusListener);
+		gambleAmount.addFocusListener(formatListener);
 		gambleAmount.addActionListener(createGamblerActionListener);
 	}
+	private FocusListener formatListener = new FocusListener() {
+		@Override
+		public void focusLost(FocusEvent arg0) {
+		}
+		
+		@Override
+		public void focusGained(FocusEvent arg0) {
+			try {
+				NumberFormat fieldFormat2 = (NumberFormat)fieldFormat.clone();
+				fieldFormat2.setGroupingUsed(false);
+				JFormattedTextField emitter = (JFormattedTextField)arg0.getSource();
+				emitter.setText(fieldFormat2.format(fieldFormat.parse(emitter.getText())));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+	};
 	private FocusListener createGamblerFocusListener = new FocusListener() {
 		@Override
 		public void focusLost(FocusEvent e) {
@@ -131,16 +158,14 @@ public class MainFrame extends JFrame {
 	 * Creates a gambler from the information in the text fields.
 	 */
 	public void createGambler() {
-		NumberFormat currency = NumberFormat.getCurrencyInstance();
 		try {
 			double winProb = parseDoubleValue(this.winProb.getText());			
 			if (winProb > 1 || winProb < 0)
 				throw new NumberFormatException();
 			lastWinProbVal = winProb;
-			double initAmount = currency.parse(this.initAmount.getText()).doubleValue();
-			double targetAmount = currency.parse(this.targetAmount.getText()).doubleValue();
-			double gambleAmount = currency.parse(this.gambleAmount.getText()).doubleValue();
-			
+			double initAmount = fieldFormat.parse(this.initAmount.getText()).doubleValue();
+			double targetAmount = fieldFormat.parse(this.targetAmount.getText()).doubleValue();
+			double gambleAmount = fieldFormat.parse(this.gambleAmount.getText()).doubleValue();
 			gambler.createGambler(winProb, initAmount, targetAmount, gambleAmount);
 			multiGambler.createGambler(winProb, initAmount, targetAmount, gambleAmount);
 		} catch (NumberFormatException e) {

@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.jfree.chart.renderer.category.BarRenderer3D;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 public class MultiGamblerPanel extends AbstractGamblerPanel {
@@ -56,8 +58,12 @@ public class MultiGamblerPanel extends AbstractGamblerPanel {
 		buttonsPanel.add(Box.createHorizontalGlue());
 		
 		// Chart
-		barChart = ChartFactory.createBarChart3D("", "", "", dataset);
+		barChart = ChartFactory.createBarChart3D("", "Parameters", "Long-Term Win Probability", dataset);
 		barChart.setAntiAlias(false);
+		BarRenderer3D renderer = new BarRenderer3D();
+		renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+		renderer.setBaseItemLabelsVisible(true);
+		barChart.getCategoryPlot().setRenderer(renderer);
 		ChartPanel chartPanel = new ChartPanel(barChart);
 		
 		// Final layout

@@ -71,7 +71,7 @@ public class GamblerPanel extends AbstractGamblerPanel {
 		buttonsPanel.add(Box.createHorizontalGlue());
 		
 		// Charts
-		lineChart = ChartFactory.createXYLineChart("", "", "", dataset);
+		lineChart = ChartFactory.createXYLineChart("", "Number of Gambles", "Money", dataset);
 		lineChart.setAntiAlias(false);
 		ChartPanel chartPanel = new ChartPanel(lineChart);
 
@@ -101,6 +101,7 @@ public class GamblerPanel extends AbstractGamblerPanel {
 	
 	
 	public void addGamble(double gamble) {
+		// Add if no initial amount yet 
 		if (series.getItemCount() == 0) {
 			series.add(currentColumn, initAmount);
 			currentColumn++;
