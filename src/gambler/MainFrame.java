@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 public class MainFrame extends JFrame {
 	private static final long serialVersionUID = -2598479547476507654L;
 	
-	double lastWinProbVal = 0.25;
+	double lastWinProbVal = 0.49;
 	JTextField winProb;
 	NumberFormat fieldFormat;
 	JFormattedTextField initAmount;
@@ -87,8 +87,8 @@ public class MainFrame extends JFrame {
 		createGambler();
 		addListeners();
 		
-		tabs.addTab("Single", gambler);
-		tabs.addTab("Multi", multiGambler);
+		tabs.addTab("Gamble Simulation", gambler);
+		tabs.addTab("Expected Winning Probability", multiGambler);
 		
 		// Final layout config
 		add(Box.createVerticalStrut(strutWidth));
